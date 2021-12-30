@@ -1,0 +1,13 @@
+[Unit]
+Description=TCP Console
+
+[Service]
+Type=simple
+User=root
+Group=root
+Restart=always
+ExecStart=/usr/local/sbin/tcpconsole
+TimeoutSec=0
+
+[Install]
+WantedBy=multi-user.target
