@@ -9,6 +9,7 @@
 
 void error_exit(char *format, ...)
 {
+	int e = errno;
 	char buffer[4096];
 	va_list ap;
 
@@ -16,7 +17,8 @@ void error_exit(char *format, ...)
 	vsnprintf(buffer, sizeof(buffer), format, ap);
 	va_end(ap);
 
-	fprintf(stderr, "%s: errno=%d (if applicable) -> %s\n", buffer, errno, strerror(errno));
+	fprintf(stderr, "%s: errno=%d (if applicable) -> %s\n", buffer, e, strerror(e));
+	errno = e;
 	syslog(LOG_ERR, "'%s': %m", buffer);
 
 	exit(127);
