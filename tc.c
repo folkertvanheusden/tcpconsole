@@ -25,6 +25,7 @@
 #include <netinet/tcp.h>
 #include <sys/klog.h>
 #include <poll.h>
+#include <sys/sysinfo.h>
 
 #include "error.h"
 
@@ -252,14 +253,18 @@ int set_dmesg_loglevel(int fd, int level)
 	return sockprint(fd, "dmesg loglevel set to %d\r\n", level);
 }
 
-int dump_loadavg(int fd)
+int dump_loadavg_uptime(int fd)
 {
-	double avg[3];
+	struct sysinfo si;
+	double avg[3] = { 0, 0, 0 };
 
 	if (getloadavg(avg, 3) == -1)
 		return sockerror(fd, "getloadavg(3)");
 
-	return sockprint(fd, "load: 1min: %f, 5min: %f, 15min: %f\r\n", avg[0], avg[1], avg[2]);
+	if (sysinfo(&si) == -1)
+		return sockerror(fd, "sysinfo(2)");
+
+	return sockprint(fd, "load: 1min: %f, 5min: %f, 15min: %f, uptime: %d seconds\r\n", avg[0], avg[1], avg[2], si.uptime);
 }
 
 int dump_ps(int fd)
@@ -497,7 +502,7 @@ void serve_client(int fd, parameters_t *pars)
 				break;
 
 			case 'i':
-				if (dump_loadavg(fd) == -1)
+				if (dump_loadavg_uptime(fd) == -1)
 					return;
 				break;
 
