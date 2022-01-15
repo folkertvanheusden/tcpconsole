@@ -42,7 +42,7 @@ typedef struct
 
 } parameters_t;
 
-int WRITE(int sock, char *s, int len)
+int WRITE(int sock, const char *s, int len)
 {
 	while(len > 0)
 	{
@@ -273,7 +273,7 @@ int dump_ps(int fd)
 		if (isdigit(de -> d_name[0]))
 		{
 			FILE *fh;
-			static char path[128];
+			static char path[300];
 
 			snprintf(path, sizeof(path), "/proc/%s/stat", de -> d_name);
 			fh = fopen(path, "r");
@@ -409,7 +409,7 @@ int kill_procs(int client_fd)
 		if (isdigit(de -> d_name[0]))
 		{
 			FILE *fh;
-			static char path[128];
+			static char path[300];
 
 			snprintf(path, sizeof(path), "/proc/%s/stat", de -> d_name);
 			fh = fopen(path, "r");
@@ -544,14 +544,12 @@ void serve_client(int fd, parameters_t *pars)
 
 int verify_password(int client_fd, char *password)
 {
-	char *entered;
-        char dont_auth[] = { 0xff, 0xf4, 0x25 };
-        char suppress_goahead[] = { 0xff, 0xfb, 0x03 };
-        char dont_linemode[] = { 0xff, 0xfe, 0x22 };
-        char dont_new_env[] = { 0xff, 0xfe, 0x27 };
-        char will_echo[] = { 0xff, 0xfb, 0x01 };
-        char dont_echo[] = { 0xff, 0xfe, 0x01 };
-        char noecho[] = { 0xff, 0xfd, 0x2d };
+	char *entered = NULL;
+        const char suppress_goahead[] = { 0xff, 0xfb, 0x03 };
+        const char dont_linemode[] = { 0xff, 0xfe, 0x22 };
+        const char dont_new_env[] = { 0xff, 0xfe, 0x27 };
+        const char will_echo[] = { 0xff, 0xfb, 0x01 };
+        const char dont_echo[] = { 0xff, 0xfe, 0x01 };
 
         WRITE(client_fd, suppress_goahead, sizeof suppress_goahead );
         WRITE(client_fd, dont_linemode, sizeof dont_linemode );
