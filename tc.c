@@ -61,7 +61,7 @@ int WRITE(int sock, const char *s, int len)
 
 int sockprint(int fd, char *format, ...)
 {
-	char buffer[4096];
+	static char buffer[4096];
 	int len;
 	va_list ap;
 
@@ -92,15 +92,18 @@ int flush_socket(int fd)
 {
 	int rc = 0;
 
+	struct pollfd fds[1] = { { fd, POLLIN, 0 } };
+
 	for(;;) {
-		char buffer[4096];
-		struct pollfd fds[1] = { { fd, POLLIN, 0 } };
+		static char buffer[128];
+
 		rc = poll(fds, 1, 0);
 
 		if (rc <= 0)
 			break;
 
 		rc = read(fd, buffer, sizeof(buffer));
+
 		if (rc <= 0) {
 			rc = -1;
 			break;
@@ -146,7 +149,7 @@ int ec_help(int fd)
 {
 	int rc = 0;
 
-	rc |= sockprint(fd, "tcpconsole v " VERSION ", (C) 2009-2016 by folkert@vanheusden.com\r\n");
+	rc |= sockprint(fd, "tcpconsole v " VERSION ", (C) 2009-2022 by folkert@vanheusden.com\r\n");
 	rc |= sockprint(fd, "h: this help\r\n");
 	rc |= sockprint(fd, "d: dump virtual console 0\r\n");
 	rc |= sockprint(fd, "j: 'kill -9' for a given pid\r\n");
@@ -169,6 +172,7 @@ int ec_help(int fd)
 	rc |= sockprint(fd, "Q - list hrtimers\r\n");
 	rc |= sockprint(fd, "S - SYNC, U - umount\r\n");
 	rc |= sockprint(fd, "T - tasklist dump, W - unint. tasks dump\r\n");
+	rc |= sockprint(fd, "See https://docs.kernel.org/admin-guide/sysrq.html for a complete list.\r\n");
 
 	return rc;
 }
@@ -478,6 +482,7 @@ void serve_client(int fd, parameters_t *pars)
 
 		switch(key)
 		{
+			case '0':
 			case '1':
 			case '2':
 			case '3':
@@ -486,6 +491,7 @@ void serve_client(int fd, parameters_t *pars)
 			case '6':
 			case '7':
 			case '8':
+			case '9':
 				if (set_dmesg_loglevel(fd, key - '0') == -1)
 					return;
 				break;

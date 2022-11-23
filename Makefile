@@ -1,10 +1,10 @@
-VERSION=0.6
+VERSION=1.0
 
 # www.vanheusden.com
 
 DEBUG=-g -D_DEBUG
 LDFLAGS+=$(DEBUG)
-CFLAGS+=-O2 -Wall -Wextra -DVERSION=\"$(VERSION)\" $(DEBUG)
+CFLAGS+=-Os -Wall -Wextra -DVERSION=\"$(VERSION)\" $(DEBUG)
 
 OBJS=error.o tc.o
 
